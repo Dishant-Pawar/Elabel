@@ -23,10 +23,20 @@ const isProtectedRoute = createRouteMatcher([
   '/:locale/api(.*)',
 ]);
 
+const isPublicRoute = createRouteMatcher([
+  '/public(.*)',
+  '/:locale/public(.*)',
+]);
+
 export default function middleware(
   request: NextRequest,
   event: NextFetchEvent,
 ) {
+  // Allow public routes to bypass authentication
+  if (isPublicRoute(request)) {
+    return intlMiddleware(request);
+  }
+
   if (
     request.nextUrl.pathname.includes('/sign-in')
     || request.nextUrl.pathname.includes('/sign-up')
@@ -61,8 +71,16 @@ export default function middleware(
         return NextResponse.redirect(orgSelection);
       }
 
+      if (req.nextUrl.pathname.startsWith('/api')) {
+        return NextResponse.next();
+      }
+
       return intlMiddleware(req);
     })(request, event);
+  }
+
+  if (request.nextUrl.pathname.startsWith('/api')) {
+    return NextResponse.next();
   }
 
   return intlMiddleware(request);

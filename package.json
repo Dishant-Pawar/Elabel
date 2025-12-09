@@ -29,6 +29,7 @@
     "@clerk/localizations": "^3.14.2",
     "@clerk/nextjs": "^6.18.3",
     "@clerk/themes": "^2.1.36",
+    "@commitlint/types": "^20.2.0",
     "@electric-sql/pglite": "^0.2.12",
     "@hookform/resolvers": "^3.9.0",
     "@logtail/pino": "^0.5.2",
@@ -43,6 +44,7 @@
     "@spotlightjs/spotlight": "^2.5.0",
     "@t3-oss/env-nextjs": "^0.11.1",
     "@tanstack/react-table": "^8.20.5",
+    "@vercel/blob": "^2.0.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.35.1",
@@ -58,7 +60,9 @@
     "react-hook-form": "^7.53.0",
     "sharp": "^0.33.5",
     "stripe": "^16.12.0",
+    "svix": "^1.82.0",
     "tailwind-merge": "^2.5.4",
+    "vite": "^7.2.7",
     "zod": "^3.23.8"
   },
   "devDependencies": {
