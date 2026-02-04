@@ -22,7 +22,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Initialize Supabase client for middleware
-  const { supabase, response } = createMiddlewareClient(request);
+  const { supabase } = createMiddlewareClient(request);
 
   // Get current user session
   const { data: { session } } = await supabase.auth.getSession();
