@@ -47,7 +47,20 @@ export async function POST(request: Request) {
       .returning();
     
     return NextResponse.json(newProduct[0], { status: 201 });
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to create product', stack: error }, { status: 400 });
+  } catch (error: any) {
+    console.error('Product creation error:', error);
+    
+    // Handle Zod validation errors
+    if (error.name === 'ZodError') {
+      return NextResponse.json({ 
+        error: 'Validation failed', 
+        details: error.errors 
+      }, { status: 400 });
+    }
+    
+    return NextResponse.json({ 
+      error: 'Failed to create product', 
+      message: error.message || 'Unknown error' 
+    }, { status: 400 });
   }
 }

@@ -47,7 +47,20 @@ export async function POST(request: Request) {
       .returning();
     
     return NextResponse.json(newIngredient[0], { status: 201 });
-  } catch (_error) {
-    return NextResponse.json({ error: 'Failed to create ingredient' }, { status: 400 });
+  } catch (error: any) {
+    console.error('Ingredient creation error:', error);
+    
+    // Handle Zod validation errors
+    if (error.name === 'ZodError') {
+      return NextResponse.json({ 
+        error: 'Validation failed', 
+        details: error.errors 
+      }, { status: 400 });
+    }
+    
+    return NextResponse.json({ 
+      error: 'Failed to create ingredient', 
+      message: error.message || 'Unknown error' 
+    }, { status: 400 });
   }
 }

@@ -109,7 +109,6 @@ export const insertProductSchema = z.object({
   externalLink: z.string().nullish(),
   redirectLink: z.string().nullish(),
   imageUrl: z.string().nullish(),
-  createdBy: z.number().nullish(),
 });
 
 export const importProductSchema = z.object({
@@ -161,7 +160,6 @@ export const importProductSchema = z.object({
   externalLink: z.string().optional(),
   redirectLink: z.string().optional(),
   imageUrl: z.string().optional(),
-  createdBy: z.number().optional(),
 });
 
 export const insertIngredientSchema = z.object({
@@ -170,7 +168,6 @@ export const insertIngredientSchema = z.object({
   eNumber: z.string().nullish(),
   allergens: z.array(z.string()).nullish(),
   details: z.string().nullish(),
-  createdBy: z.number().nullish(),
 });
 
 export type User = typeof users.$inferSelect;
