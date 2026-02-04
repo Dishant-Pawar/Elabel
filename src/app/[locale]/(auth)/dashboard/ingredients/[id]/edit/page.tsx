@@ -1,5 +1,6 @@
 'use client';
 
+import { ArrowLeft } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -116,6 +117,17 @@ export default function EditIngredientPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
+      {/* Back Button */}
+      <Button
+        type="button"
+        variant="outline"
+        onClick={() => router.push(`/dashboard/ingredients/${params.id}`)}
+        className="mb-4"
+      >
+        <ArrowLeft className="mr-2 size-4" />
+        Back to Ingredient Details
+      </Button>
+
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Edit Ingredient</h1>
       </div>

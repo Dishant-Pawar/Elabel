@@ -1,15 +1,50 @@
 'use client';
 
-// TEMPORARILY BYPASS CLERK
-// import { UserButton } from '@clerk/nextjs';
+import { LogOut } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { createClient } from '@/libs/supabase/client';
 import { Logo } from '@/templates/Logo';
 
 export default function DashboardLayout(props: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const isHome = pathname === '/dashboard' || pathname.endsWith('/dashboard');
+  const [loggingOut, setLoggingOut] = useState(false);
+  const [userEmail, setUserEmail] = useState<string>('');
+  const supabase = createClient();
+
+  // Fetch user email on mount
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.email) {
+        setUserEmail(user.email);
+      }
+    };
+    getUser();
+  }, [supabase]);
+
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    try {
+      await supabase.auth.signOut();
+      router.push('/login');
+      router.refresh();
+    } catch (error) {
+      console.error('Logout error:', error);
+      setLoggingOut(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -34,7 +69,7 @@ export default function DashboardLayout(props: { children: React.ReactNode }) {
                 >
                   <path d="m15 18-6-6 6-6" />
                 </svg>
-                Logout
+                Back
               </Link>
             )}
           </div>
@@ -45,17 +80,22 @@ export default function DashboardLayout(props: { children: React.ReactNode }) {
           </div>
 
           <div>
-            {/* TEMPORARILY DISABLED - UserButton requires Clerk */}
-            <div className="flex size-9 items-center justify-center rounded-full bg-muted text-sm font-medium">
-              G
-            </div>
-            {/* <UserButton
-              appearance={{
-                elements: {
-                  avatarBox: 'size-9',
-                },
-              }}
-            /> */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="rounded-md px-3 py-2 text-sm font-medium hover:bg-muted"
+                >
+                  {userEmail || 'Loading...'}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleLogout} disabled={loggingOut}>
+                  <LogOut className="mr-2 size-4" />
+                  {loggingOut ? 'Logging out...' : 'Logout'}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </header>

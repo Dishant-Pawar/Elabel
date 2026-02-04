@@ -1,6 +1,6 @@
 'use client';
 
-import { Pencil, Trash2 } from 'lucide-react';
+import { ArrowLeft, Pencil, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
@@ -122,6 +122,14 @@ export default function ProductPreviewPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
+      {/* Back Button */}
+      <Link href="/dashboard">
+        <Button variant="outline" className="mb-4">
+          <ArrowLeft className="mr-2 size-4" />
+          Back to Dashboard
+        </Button>
+      </Link>
+
       {/* Product Header */}
       <Card>
         <CardContent className="p-6">

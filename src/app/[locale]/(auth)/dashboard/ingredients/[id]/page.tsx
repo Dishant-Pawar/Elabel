@@ -1,6 +1,6 @@
 'use client';
 
-import { Pencil, Trash2 } from 'lucide-react';
+import { ArrowLeft, Pencil, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -108,6 +108,14 @@ export default function IngredientDetailPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
+      {/* Back Button */}
+      <Link href="/dashboard">
+        <Button variant="outline" className="mb-4">
+          <ArrowLeft className="mr-2 size-4" />
+          Back to Dashboard
+        </Button>
+      </Link>
+
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Ingredient Details</h1>
         <div className="flex gap-2">
