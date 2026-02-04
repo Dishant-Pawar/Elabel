@@ -1,6 +1,5 @@
 'use client';
 
-import { upload } from '@vercel/blob/client';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -79,12 +78,22 @@ export default function AddProductPage() {
     setImageUploading(true);
 
     try {
-      const newBlob = await upload(file.name, file, {
-        access: 'public',
-        handleUploadUrl: '/api/products/upload',
+      // Create FormData to send the file
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/products/upload', {
+        method: 'POST',
+        body: formData,
       });
 
-      setFormData(prev => ({ ...prev, imageUrl: newBlob.url }));
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Upload failed');
+      }
+
+      const { url } = await response.json();
+      setFormData(prev => ({ ...prev, imageUrl: url }));
     } catch (err: any) {
       setImageUploadError(String(err?.message ?? err));
       console.error('Image upload error', err);
