@@ -1,5 +1,4 @@
 import {
-  type NextFetchEvent,
   type NextRequest,
   NextResponse,
 } from 'next/server';
@@ -13,10 +12,7 @@ const intlMiddleware = createMiddleware({
   defaultLocale: AppConfig.defaultLocale,
 });
 
-export default function middleware(
-  request: NextRequest,
-  event: NextFetchEvent,
-) {
+export default function middleware(request: NextRequest) {
   // TEMPORARILY BYPASS CLERK AUTHENTICATION
   // TODO: Set up proper Clerk keys or migrate to Supabase Auth
   if (request.nextUrl.pathname.startsWith('/api')) {
