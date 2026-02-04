@@ -1,12 +1,14 @@
 'use client';
 
-// TEMPORARILY BYPASS CLERK COMPONENTS
-// import { OrganizationSwitcher, UserButton } from '@clerk/nextjs';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { LogOut, User } from 'lucide-react';
 
 import { ActiveLink } from '@/components/ActiveLink';
 import { LocaleSwitcher } from '@/components/LocaleSwitcher';
 import { ToggleMenuButton } from '@/components/ToggleMenuButton';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,6 +17,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Separator } from '@/components/ui/separator';
 import { Logo } from '@/templates/Logo';
+import { createClient } from '@/libs/supabase/client';
 
 export const DashboardHeader = (props: {
   menu: {
@@ -22,6 +25,25 @@ export const DashboardHeader = (props: {
     label: string;
   }[];
 }) => {
+  const router = useRouter();
+  const [loggingOut, setLoggingOut] = useState(false);
+  const supabase = createClient();
+
+  /**
+   * Handle user logout
+   * Signs out from Supabase and redirects to login page
+   */
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    try {
+      await supabase.auth.signOut();
+      router.push('/login');
+      router.refresh();
+    } catch (error) {
+      console.error('Logout error:', error);
+      setLoggingOut(false);
+    }
+  };
   return (
     <>
       <div className="flex items-center">
@@ -103,17 +125,21 @@ export const DashboardHeader = (props: {
           </li>
 
           <li>
-            {/* TEMPORARILY DISABLED - UserButton requires Clerk auth */}
-            <div className="px-2 py-1.5 text-sm">Guest User</div>
-            {/* <UserButton
-              userProfileMode="navigation"
-              userProfileUrl="/dashboard/user-profile"
-              appearance={{
-                elements: {
-                  rootBox: 'px-2 py-1.5',
-                },
-              }}
-            /> */}
+            {/* User Menu with Logout */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-8 gap-2">
+                  <User className="size-4" />
+                  <span className="max-sm:hidden">Account</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleLogout} disabled={loggingOut}>
+                  <LogOut className="mr-2 size-4" />
+                  {loggingOut ? 'Logging out...' : 'Logout'}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </li>
         </ul>
       </div>
