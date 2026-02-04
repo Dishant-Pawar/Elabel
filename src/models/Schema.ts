@@ -43,7 +43,7 @@ export const products = pgTable('products', {
   imageUrl: text('image_url'),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
-  createdBy: integer('created_by'),
+  userId: text('user_id').notNull(), // Supabase Auth user ID
 });
 
 export const ingredients = pgTable('ingredients', {
@@ -55,7 +55,7 @@ export const ingredients = pgTable('ingredients', {
   details: text('details'),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
-  createdBy: integer('created_by'),
+  userId: text('user_id').notNull(), // Supabase Auth user ID
 });
 
 export const insertUserSchema = z.object({
