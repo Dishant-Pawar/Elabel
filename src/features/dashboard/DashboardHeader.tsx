@@ -16,7 +16,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Separator } from '@/components/ui/separator';
 import { Logo } from '@/templates/Logo';
-import { getI18nPath } from '@/utils/Helpers';
 
 export const DashboardHeader = (props: {
   menu: {
