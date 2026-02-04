@@ -8,6 +8,21 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  countryOptions,
+  netVolumeOptions,
+  operatorTypeOptions,
+  packagingGasesOptions,
+  sugarContentOptions,
+  wineTypeOptions,
+} from '@/utils/ProductConstants';
 
 export default function AddProductPage() {
   const router = useRouter();
@@ -50,6 +65,10 @@ export default function AddProductPage() {
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
     }));
+  };
+
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -136,13 +155,21 @@ export default function AddProductPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="netVolume">Net Volume</Label>
-                  <Input
-                    id="netVolume"
-                    name="netVolume"
+                  <Select
                     value={formData.netVolume}
-                    onChange={handleChange}
-                    placeholder="e.g., 750ml"
-                  />
+                    onValueChange={value => handleSelectChange('netVolume', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select volume" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {netVolumeOptions.map(option => (
+                        <SelectItem key={option} value={option}>
+                          {option}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="vintage">Vintage</Label>
@@ -156,23 +183,39 @@ export default function AddProductPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="wineType">Wine Type</Label>
-                  <Input
-                    id="wineType"
-                    name="wineType"
+                  <Select
                     value={formData.wineType}
-                    onChange={handleChange}
-                    placeholder="e.g., Red, White, Rosé"
-                  />
+                    onValueChange={value => handleSelectChange('wineType', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select wine type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {wineTypeOptions.map(option => (
+                        <SelectItem key={option} value={option}>
+                          {option}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="sugarContent">Sugar Content</Label>
-                  <Input
-                    id="sugarContent"
-                    name="sugarContent"
+                  <Select
                     value={formData.sugarContent}
-                    onChange={handleChange}
-                    placeholder="e.g., Dry, Semi-dry"
-                  />
+                    onValueChange={value => handleSelectChange('sugarContent', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select sugar content" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {sugarContentOptions.map(option => (
+                        <SelectItem key={option} value={option}>
+                          {option}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="appellation">Appellation</Label>
@@ -253,13 +296,21 @@ export default function AddProductPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="packagingGases">Packaging Gases</Label>
-                  <Input
-                    id="packagingGases"
-                    name="packagingGases"
+                  <Select
                     value={formData.packagingGases}
-                    onChange={handleChange}
-                    placeholder="Enter packaging gases"
-                  />
+                    onValueChange={value => handleSelectChange('packagingGases', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select packaging gas" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {packagingGasesOptions.map(option => (
+                        <SelectItem key={option} value={option}>
+                          {option}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </div>
@@ -307,13 +358,21 @@ export default function AddProductPage() {
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="operatorType">Operator Type</Label>
-                  <Input
-                    id="operatorType"
-                    name="operatorType"
+                  <Select
                     value={formData.operatorType}
-                    onChange={handleChange}
-                    placeholder="e.g., Producer, Importer"
-                  />
+                    onValueChange={value => handleSelectChange('operatorType', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select operator type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {operatorTypeOptions.map(option => (
+                        <SelectItem key={option} value={option}>
+                          {option}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="operatorName">Operator Name</Label>
@@ -354,13 +413,21 @@ export default function AddProductPage() {
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="countryOfOrigin">Country of Origin</Label>
-                  <Input
-                    id="countryOfOrigin"
-                    name="countryOfOrigin"
+                  <Select
                     value={formData.countryOfOrigin}
-                    onChange={handleChange}
-                    placeholder="e.g., France"
-                  />
+                    onValueChange={value => handleSelectChange('countryOfOrigin', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select country" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {countryOptions.map(option => (
+                        <SelectItem key={option} value={option}>
+                          {option}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="sku">SKU</Label>

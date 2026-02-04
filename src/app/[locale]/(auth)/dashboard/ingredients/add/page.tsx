@@ -7,6 +7,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { allWineIngredients } from '@/utils/ProductConstants';
 
 export default function AddIngredientPage() {
   const router = useRouter();
@@ -15,7 +23,7 @@ export default function AddIngredientPage() {
     name: '',
     category: '',
     eNumber: '',
-    allergens: '',
+    allergens: [] as string[],
     details: '',
   });
 
@@ -27,26 +35,30 @@ export default function AddIngredientPage() {
     }));
   };
 
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleAllergenToggle = (allergen: string) => {
+    setFormData(prev => ({
+      ...prev,
+      allergens: prev.allergens.includes(allergen)
+        ? prev.allergens.filter(a => a !== allergen)
+        : [...prev.allergens, allergen],
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      // Convert allergens string to array
-      const allergensArray = formData.allergens
-        .split(',')
-        .map(a => a.trim())
-        .filter(a => a.length > 0);
-
       const response = await fetch('/api/ingredients', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ...formData,
-          allergens: allergensArray,
-        }),
+        body: JSON.stringify(formData),
       });
 
       if (response.ok) {
@@ -62,6 +74,17 @@ export default function AddIngredientPage() {
     }
   };
 
+  const categories = [
+    'General',
+    'Gases and packaging gases',
+    'Acidity regulators',
+    'Stabilising agents',
+    'Preservatives and antioxidants',
+    'Processing aids',
+  ];
+
+  const allergens = ['Egg', 'Milk', 'Sulphites', 'Lysozyme'];
+
   return (
     <div className="mx-auto max-w-2xl">
       <Card>
@@ -72,25 +95,40 @@ export default function AddIngredientPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="name">Ingredient Name *</Label>
-              <Input
-                id="name"
-                name="name"
+              <Select
                 value={formData.name}
-                onChange={handleChange}
-                required
-                placeholder="Enter ingredient name"
-              />
+                onValueChange={value => handleSelectChange('name', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select ingredient" />
+                </SelectTrigger>
+                <SelectContent>
+                  {allWineIngredients.map(option => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="category">Category</Label>
-              <Input
-                id="category"
-                name="category"
+              <Label htmlFor="category">Category *</Label>
+              <Select
                 value={formData.category}
-                onChange={handleChange}
-                placeholder="e.g., Preservative, Colorant, Sweetener"
-              />
+                onValueChange={value => handleSelectChange('category', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map(option => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
@@ -106,16 +144,19 @@ export default function AddIngredientPage() {
 
             <div className="space-y-2">
               <Label htmlFor="allergens">Allergens</Label>
-              <Input
-                id="allergens"
-                name="allergens"
-                value={formData.allergens}
-                onChange={handleChange}
-                placeholder="Comma-separated, e.g., Sulfites, Milk, Eggs"
-              />
-              <p className="text-sm text-gray-500">
-                Enter allergens separated by commas
-              </p>
+              <div className="flex flex-wrap gap-6">
+                {allergens.map(allergen => (
+                  <label key={allergen} className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.allergens.includes(allergen)}
+                      onChange={() => handleAllergenToggle(allergen)}
+                      className="size-4"
+                    />
+                    <span>{allergen}</span>
+                  </label>
+                ))}
+              </div>
             </div>
 
             <div className="space-y-2">
