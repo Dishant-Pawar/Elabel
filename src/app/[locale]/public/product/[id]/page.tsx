@@ -2,7 +2,6 @@
 import { db } from '@/libs/DB';
 import { products } from '@/models/Schema';
 import { notFound } from 'next/navigation';
-import { useTranslations } from 'next-intl';
 import { Card } from '@/components/ui/card';
 import { eq } from 'drizzle-orm';
 
@@ -21,7 +20,6 @@ function StatusIcon({ active, label }: { active?: boolean | null; label: string 
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
-  const t = useTranslations('product');
   const productId = parseInt(params.id, 10);
   const product = await db
     .select()
@@ -55,20 +53,20 @@ export default async function ProductPage({ params }: ProductPageProps) {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 mb-6">
-            {p.vintage && <div><strong>{t('vintage') || 'Vintage'}:</strong> {p.vintage}</div>}
-            {p.wineType && <div><strong>{t('wineType') || 'Type'}:</strong> {p.wineType}</div>}
-            {p.appellation && <div><strong>{t('appellation') || 'Appellation'}:</strong> {p.appellation}</div>}
-            {p.alcoholContent && <div><strong>{t('alcoholContent') || 'Alcohol'}:</strong> {p.alcoholContent}%</div>}
-            {p.sugarContent && <div><strong>{t('sugarContent') || 'Sugar'}:</strong> {p.sugarContent}</div>}
-            {p.netVolume && <div><strong>{t('netVolume') || 'Net Volume'}:</strong> {p.netVolume}</div>}
-            {p.portionSize && <div><strong>{t('portionSize') || 'Portion Size'}:</strong> {p.portionSize}</div>}
-            {p.packagingGases && <div><strong>{t('packagingGases') || 'Packaging Gases'}:</strong> {p.packagingGases}</div>}
-            {p.countryOfOrigin && <div><strong>{t('countryOfOrigin') || 'Country'}:</strong> {p.countryOfOrigin}</div>}
-            {p.operatorName && <div><strong>{t('operatorName') || 'Operator'}:</strong> {p.operatorName}</div>}
-            {p.operatorAddress && <div><strong>{t('operatorAddress') || 'Operator Address'}:</strong> {p.operatorAddress}</div>}
-            {p.operatorInfo && <div><strong>{t('operatorInfo') || 'Operator Info'}:</strong> {p.operatorInfo}</div>}
-            {p.sku && <div><strong>{t('sku') || 'SKU'}:</strong> {p.sku}</div>}
-            {p.ean && <div><strong>{t('ean') || 'EAN'}:</strong> {p.ean}</div>}
+            {p.vintage && <div><strong>Vintage:</strong> {p.vintage}</div>}
+            {p.wineType && <div><strong>Type:</strong> {p.wineType}</div>}
+            {p.appellation && <div><strong>Appellation:</strong> {p.appellation}</div>}
+            {p.alcoholContent && <div><strong>Alcohol:</strong> {p.alcoholContent}%</div>}
+            {p.sugarContent && <div><strong>Sugar:</strong> {p.sugarContent}</div>}
+            {p.netVolume && <div><strong>Net Volume:</strong> {p.netVolume}</div>}
+            {p.portionSize && <div><strong>Portion Size:</strong> {p.portionSize}</div>}
+            {p.packagingGases && <div><strong>Packaging Gases:</strong> {p.packagingGases}</div>}
+            {p.countryOfOrigin && <div><strong>Country:</strong> {p.countryOfOrigin}</div>}
+            {p.operatorName && <div><strong>Operator:</strong> {p.operatorName}</div>}
+            {p.operatorAddress && <div><strong>Operator Address:</strong> {p.operatorAddress}</div>}
+            {p.operatorInfo && <div><strong>Operator Info:</strong> {p.operatorInfo}</div>}
+            {p.sku && <div><strong>SKU:</strong> {p.sku}</div>}
+            {p.ean && <div><strong>EAN:</strong> {p.ean}</div>}
           </div>
 
           <div className="mb-6">
@@ -83,7 +81,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
           {p.externalLink && (
             <a href={p.externalLink} target="_blank" rel="noopener noreferrer" className="inline-block mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
-              {t('externalLink') || 'More Info'}
+              More Info
             </a>
           )}
         </div>
