@@ -1,6 +1,7 @@
 'use client';
 
-import { UserButton } from '@clerk/nextjs';
+// TEMPORARILY BYPASS CLERK
+// import { UserButton } from '@clerk/nextjs';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -44,13 +45,17 @@ export default function DashboardLayout(props: { children: React.ReactNode }) {
           </div>
 
           <div>
-            <UserButton
+            {/* TEMPORARILY DISABLED - UserButton requires Clerk */}
+            <div className="flex size-9 items-center justify-center rounded-full bg-muted text-sm font-medium">
+              G
+            </div>
+            {/* <UserButton
               appearance={{
                 elements: {
                   avatarBox: 'size-9',
                 },
               }}
-            />
+            /> */}
           </div>
         </div>
       </header>

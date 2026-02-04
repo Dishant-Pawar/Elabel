@@ -1,5 +1,8 @@
+import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
-import SignUpForm from './SignUpForm';
+
+// TEMPORARILY BYPASS - SignUpForm requires Clerk
+// import SignUpForm from './SignUpForm';
 
 export async function generateMetadata(props: { params: { locale: string } }) {
   const t = await getTranslations({
@@ -14,7 +17,8 @@ export async function generateMetadata(props: { params: { locale: string } }) {
 }
 
 const SignUpPage = (props: { params: { locale: string } }) => {
-  return <SignUpForm locale={props.params.locale} />;
+  // Authentication bypassed - redirect to dashboard
+  redirect('/dashboard');
 };
 
 export default SignUpPage;

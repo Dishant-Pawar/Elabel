@@ -1,6 +1,7 @@
 'use client';
 
-import { OrganizationSwitcher, UserButton } from '@clerk/nextjs';
+// TEMPORARILY BYPASS CLERK COMPONENTS
+// import { OrganizationSwitcher, UserButton } from '@clerk/nextjs';
 import Link from 'next/link';
 import { useLocale } from 'next-intl';
 
@@ -44,7 +45,12 @@ export const DashboardHeader = (props: {
           <path d="M17 5 7 19" />
         </svg>
 
-        <OrganizationSwitcher
+        {/* TEMPORARILY DISABLED - OrganizationSwitcher requires Clerk auth */}
+        <div className="ml-3 px-4 py-2 bg-muted rounded text-sm">
+          No Organization
+        </div>
+
+        {/* <OrganizationSwitcher
           organizationProfileMode="navigation"
           organizationProfileUrl={getI18nPath(
             '/dashboard/organization-profile',
@@ -58,7 +64,7 @@ export const DashboardHeader = (props: {
               organizationSwitcherTrigger: 'max-w-28 sm:max-w-52',
             },
           }}
-        />
+        /> */}
 
         <nav className="ml-3 max-lg:hidden">
           <ul className="flex flex-row items-center gap-x-3 text-lg font-medium [&_a:hover]:opacity-100 [&_a]:opacity-75">
@@ -101,7 +107,9 @@ export const DashboardHeader = (props: {
           </li>
 
           <li>
-            <UserButton
+            {/* TEMPORARILY DISABLED - UserButton requires Clerk auth */}
+            <div className="px-2 py-1.5 text-sm">Guest User</div>
+            {/* <UserButton
               userProfileMode="navigation"
               userProfileUrl="/dashboard/user-profile"
               appearance={{
@@ -109,7 +117,7 @@ export const DashboardHeader = (props: {
                   rootBox: 'px-2 py-1.5',
                 },
               }}
-            />
+            /> */}
           </li>
         </ul>
       </div>
