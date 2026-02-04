@@ -27,6 +27,14 @@ export default withSentryConfig(
       experimental: {
         serverComponentsExternalPackages: ['@electric-sql/pglite'],
       },
+      images: {
+        remotePatterns: [
+          {
+            protocol: 'https',
+            hostname: '**.supabase.co',
+          },
+        ],
+      },
     }),
   ),
   {
