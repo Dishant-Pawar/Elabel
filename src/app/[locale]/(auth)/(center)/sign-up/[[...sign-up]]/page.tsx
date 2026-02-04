@@ -16,7 +16,7 @@ export async function generateMetadata(props: { params: { locale: string } }) {
   };
 }
 
-const SignUpPage = (props: { params: { locale: string } }) => {
+const SignUpPage = () => {
   // Authentication bypassed - redirect to dashboard
   redirect('/dashboard');
 };
