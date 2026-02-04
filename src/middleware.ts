@@ -1,4 +1,3 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import {
   type NextFetchEvent,
   type NextRequest,
@@ -13,20 +12,6 @@ const intlMiddleware = createMiddleware({
   localePrefix: AppConfig.localePrefix,
   defaultLocale: AppConfig.defaultLocale,
 });
-
-const isProtectedRoute = createRouteMatcher([
-  '/dashboard(.*)',
-  '/:locale/dashboard(.*)',
-  '/onboarding(.*)',
-  '/:locale/onboarding(.*)',
-  '/api(.*)',
-  '/:locale/api(.*)',
-]);
-
-const isPublicRoute = createRouteMatcher([
-  '/public(.*)',
-  '/:locale/public(.*)',
-]);
 
 export default function middleware(
   request: NextRequest,
