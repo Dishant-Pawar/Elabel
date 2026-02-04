@@ -14,10 +14,11 @@ const intlMiddleware = createMiddleware({
 });
 
 export async function middleware(request: NextRequest) {
-  // Skip auth for API routes and public assets
+  // Skip auth for API routes, public assets, and static files
   if (request.nextUrl.pathname.startsWith('/api') ||
       request.nextUrl.pathname.startsWith('/_next') ||
-      request.nextUrl.pathname.startsWith('/monitoring')) {
+      request.nextUrl.pathname.startsWith('/monitoring') ||
+      request.nextUrl.pathname.includes('/public/')) {
     return NextResponse.next();
   }
 
@@ -27,23 +28,32 @@ export async function middleware(request: NextRequest) {
   // Get current user session
   const { data: { session } } = await supabase.auth.getSession();
 
-  const isAuthPage = request.nextUrl.pathname.includes('/login') || 
-                     request.nextUrl.pathname.includes('/signup');
-  const isProtectedRoute = request.nextUrl.pathname.includes('/dashboard');
+  // Extract locale and path
+  const pathParts = request.nextUrl.pathname.split('/').filter(Boolean);
+  const locale = AllLocales.includes(pathParts[0] as any) ? pathParts[0] : AppConfig.defaultLocale;
+  const pathWithoutLocale = '/' + pathParts.slice(AllLocales.includes(pathParts[0] as any) ? 1 : 0).join('/');
+
+  const isAuthPage = pathWithoutLocale === '/login' || pathWithoutLocale === '/signup';
+  const isProtectedRoute = pathWithoutLocale.startsWith('/dashboard');
+  const isRootPath = pathWithoutLocale === '' || pathWithoutLocale === '/';
 
   // Redirect to login if accessing protected route without session
   if (isProtectedRoute && !session) {
-    const locale = request.nextUrl.pathname.split('/')[1] || AppConfig.defaultLocale;
     return NextResponse.redirect(new URL(`/${locale}/login`, request.url));
   }
 
   // Redirect to dashboard if accessing auth pages with active session
   if (isAuthPage && session) {
-    const locale = request.nextUrl.pathname.split('/')[1] || AppConfig.defaultLocale;
     return NextResponse.redirect(new URL(`/${locale}/dashboard`, request.url));
   }
 
-  // Apply internationalization middleware
+  // Redirect root path based on session
+  if (isRootPath) {
+    const destination = session ? `/${locale}/dashboard` : `/${locale}/login`;
+    return NextResponse.redirect(new URL(destination, request.url));
+  }
+
+  // Apply internationalization middleware for all other cases
   return intlMiddleware(request);
 }
 
