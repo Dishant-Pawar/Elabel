@@ -25,10 +25,11 @@ const QRCode = ({ value, size = 200 }: { value: string; size?: number }) => {
   );
 };
 
-const getProductUrl = (productId: string | string[] | undefined) => {
-  if (typeof window !== 'undefined' && productId) {
+const getProductUrl = (productId: string | string[] | undefined, locale: string | string[] | undefined) => {
+  if (typeof window !== 'undefined' && productId && locale) {
     const id = Array.isArray(productId) ? productId[0] : productId;
-    return `${window.location.origin}/public/product/${id}`;
+    const localeStr = Array.isArray(locale) ? locale[0] : locale;
+    return `${window.location.origin}/${localeStr}/public/product/${id}`;
   }
   return '';
 };
@@ -72,7 +73,7 @@ export default function QRLabelPage() {
       return;
     }
 
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(getProductUrl(params.id))}`;
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(getProductUrl(params.id, params.locale))}`;
 
     try {
       const response = await fetch(qrUrl);
@@ -132,7 +133,7 @@ export default function QRLabelPage() {
 
             {/* QR Code */}
             <div className="my-4">
-              <QRCode value={getProductUrl(params.id)} size={200} />
+              <QRCode value={getProductUrl(params.id, params.locale)} size={200} />
             </div>
 
             {/* Product Details */}
