@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
+import { useLocale } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -25,11 +26,10 @@ const QRCode = ({ value, size = 200 }: { value: string; size?: number }) => {
   );
 };
 
-const getProductUrl = (productId: string | string[] | undefined, locale: string | string[] | undefined) => {
+const getProductUrl = (productId: string | string[] | undefined, locale: string) => {
   if (typeof window !== 'undefined' && productId && locale) {
     const id = Array.isArray(productId) ? productId[0] : productId;
-    const localeStr = Array.isArray(locale) ? locale[0] : locale;
-    return `${window.location.origin}/${localeStr}/public/product/${id}`;
+    return `${window.location.origin}/${locale}/public/product/${id}`;
   }
   return '';
 };
@@ -37,6 +37,7 @@ const getProductUrl = (productId: string | string[] | undefined, locale: string 
 export default function QRLabelPage() {
   const params = useParams();
   const router = useRouter();
+  const locale = useLocale();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const printRef = useRef<HTMLDivElement>(null);
@@ -73,7 +74,7 @@ export default function QRLabelPage() {
       return;
     }
 
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(getProductUrl(params.id, params.locale))}`;
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(getProductUrl(params.id, locale))}`;
 
     try {
       const response = await fetch(qrUrl);
@@ -133,7 +134,7 @@ export default function QRLabelPage() {
 
             {/* QR Code */}
             <div className="my-4">
-              <QRCode value={getProductUrl(params.id, params.locale)} size={200} />
+              <QRCode value={getProductUrl(params.id, locale)} size={200} />
             </div>
 
             {/* Product Details */}
