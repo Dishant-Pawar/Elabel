@@ -1,6 +1,6 @@
 'use client';
 
-import { LogOut } from 'lucide-react';
+import { LogOut, Settings, User } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -90,6 +90,12 @@ export default function DashboardLayout(props: { children: React.ReactNode }) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard/settings" className="flex cursor-pointer items-center">
+                    <Settings className="mr-2 size-4" />
+                    Settings
+                  </Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleLogout} disabled={loggingOut}>
                   <LogOut className="mr-2 size-4" />
                   {loggingOut ? 'Logging out...' : 'Logout'}
