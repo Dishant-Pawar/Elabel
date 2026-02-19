@@ -20,15 +20,17 @@ export default function DashboardLayout(props: { children: React.ReactNode }) {
   const router = useRouter();
   const isHome = pathname === '/dashboard' || pathname.endsWith('/dashboard');
   const [loggingOut, setLoggingOut] = useState(false);
+  const [userName, setUserName] = useState<string>('');
   const [userEmail, setUserEmail] = useState<string>('');
   const supabase = createClient();
 
-  // Fetch user email on mount
+  // Fetch user name and email on mount
   useEffect(() => {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (user?.email) {
-        setUserEmail(user.email);
+      if (user) {
+        setUserEmail(user.email || '');
+        setUserName(user.user_metadata?.name || '');
       }
     };
     getUser();
@@ -86,7 +88,7 @@ export default function DashboardLayout(props: { children: React.ReactNode }) {
                   variant="ghost"
                   className="rounded-md px-3 py-2 text-sm font-medium hover:bg-muted"
                 >
-                  {userEmail || 'Loading...'}
+                  {userName || userEmail || 'Loading...'}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">

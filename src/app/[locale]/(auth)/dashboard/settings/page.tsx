@@ -1,6 +1,6 @@
 'use client';
 
-import { Camera, Check, LogOut, Mail, Shield, User, X } from 'lucide-react';
+import { Camera, Check, LogOut, Shield, User, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -21,14 +21,7 @@ type UserProfile = {
   id: string;
   email: string;
   name?: string;
-  job_title?: string;
   avatar_url?: string;
-};
-
-type ConnectedAccount = {
-  provider: string;
-  email: string;
-  connected_at: string;
 };
 
 export default function SettingsPage() {
@@ -38,14 +31,8 @@ export default function SettingsPage() {
   // Profile state
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
-  const [profileForm, setProfileForm] = useState({ name: '', job_title: '' });
+  const [profileForm, setProfileForm] = useState({ name: '' });
   const [savingProfile, setSavingProfile] = useState(false);
-
-  // Email state
-  const [isEditingEmail, setIsEditingEmail] = useState(false);
-  const [newEmail, setNewEmail] = useState('');
-  const [emailVerificationSent, setEmailVerificationSent] = useState(false);
-  const [savingEmail, setSavingEmail] = useState(false);
 
   // Password state
   const [isEditingPassword, setIsEditingPassword] = useState(false);
@@ -56,15 +43,7 @@ export default function SettingsPage() {
   });
   const [savingPassword, setSavingPassword] = useState(false);
   const [passwordError, setPasswordError] = useState('');
-
-  // Connected accounts (mock data - would come from Supabase in production)
-  const [connectedAccounts] = useState<ConnectedAccount[]>([
-    {
-      provider: 'Google',
-      email: 'user@gmail.com',
-      connected_at: '2024-01-15',
-    },
-  ]);
+  const [sendingResetEmail, setSendingResetEmail] = useState(false);
 
   // Logout state
   const [loggingOut, setLoggingOut] = useState(false);
@@ -79,13 +58,11 @@ export default function SettingsPage() {
           id: user.id,
           email: user.email || '',
           name: user.user_metadata?.name || '',
-          job_title: user.user_metadata?.job_title || '',
           avatar_url: user.user_metadata?.avatar_url || '',
         };
         setProfile(userProfile);
         setProfileForm({
           name: userProfile.name || '',
-          job_title: userProfile.job_title || '',
         });
       }
     };
@@ -99,7 +76,6 @@ export default function SettingsPage() {
       const { error } = await supabase.auth.updateUser({
         data: {
           name: profileForm.name,
-          job_title: profileForm.job_title,
         },
       });
 
@@ -109,41 +85,13 @@ export default function SettingsPage() {
 
       setProfile(prev => prev ? { ...prev, ...profileForm } : null);
       setIsEditingProfile(false);
+
+      // Refresh the page to update the header
+      router.refresh();
     } catch (error) {
       console.error('Error updating profile:', error);
-      alert('Failed to update profile. Please try again.');
     } finally {
       setSavingProfile(false);
-    }
-  };
-
-  // Handle email change
-  const handleEmailChange = async () => {
-    if (!newEmail || newEmail === profile?.email) {
-      return;
-    }
-
-    setSavingEmail(true);
-    try {
-      const { error } = await supabase.auth.updateUser({
-        email: newEmail,
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      setEmailVerificationSent(true);
-      setTimeout(() => {
-        setIsEditingEmail(false);
-        setEmailVerificationSent(false);
-        setNewEmail('');
-      }, 3000);
-    } catch (error) {
-      console.error('Error updating email:', error);
-      alert('Failed to update email. Please try again.');
-    } finally {
-      setSavingEmail(false);
     }
   };
 
@@ -161,22 +109,65 @@ export default function SettingsPage() {
       return;
     }
 
+    // Verify current password before changing
+    if (!passwordForm.current) {
+      setPasswordError('Please enter your current password');
+      return;
+    }
+
     setSavingPassword(true);
     try {
+      // First, verify the current password by attempting to sign in
+      const { error: verifyError } = await supabase.auth.signInWithPassword({
+        email: profile?.email || '',
+        password: passwordForm.current,
+      });
+
+      if (verifyError) {
+        setPasswordError('Current password is incorrect');
+        setSavingPassword(false);
+        return;
+      }
+
+      // Now update the password
       const { error } = await supabase.auth.updateUser({
         password: passwordForm.new,
       });
 
       if (error) {
-        throw error;
+        // Handle specific Supabase errors
+        if (error.message.includes('same_password') || error.message.includes('same password')) {
+          setPasswordError('New password must be different from your current password');
+        } else {
+          setPasswordError(error.message || 'Failed to update password. Please try again.');
+        }
+        setSavingPassword(false);
+        return;
       }
 
       setIsEditingPassword(false);
       setPasswordForm({ current: '', new: '', confirm: '' });
-      alert('Password updated successfully!');
-    } catch (error) {
+
+      // Sign out user after password change to force re-login with new password
+      await supabase.auth.signOut();
+
+      // Show success message and redirect
+      setPasswordError('Password updated successfully! Please login with your new password.');
+      setTimeout(() => {
+        router.push('/login');
+        router.refresh();
+      }, 2000);
+    } catch (error: any) {
       console.error('Error updating password:', error);
-      setPasswordError('Failed to update password. Please try again.');
+
+      // Parse error message for better user feedback
+      if (error?.message?.includes('same_password') || error?.message?.includes('same password')) {
+        setPasswordError('New password must be different from your current password');
+      } else if (error?.message) {
+        setPasswordError(error.message);
+      } else {
+        setPasswordError('Failed to update password. Please try again.');
+      }
     } finally {
       setSavingPassword(false);
     }
@@ -184,23 +175,50 @@ export default function SettingsPage() {
 
   // Handle forgot password
   const handleForgotPassword = async () => {
-    if (!profile?.email) {
+    if (!profile?.email || sendingResetEmail) {
       return;
     }
 
+    setSendingResetEmail(true);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(profile.email, {
         redirectTo: `${window.location.origin}/reset-password`,
       });
 
       if (error) {
-        throw error;
+        // Handle rate limiting error
+        if (error.message?.includes('email_send_rate_limit') || error.message?.includes('rate limit')) {
+          setPasswordError('Too many requests. Please wait a few minutes before trying again.');
+        } else {
+          setPasswordError(error.message || 'Failed to send reset email. Please try again.');
+        }
+        setTimeout(() => {
+          setPasswordError('');
+          setSendingResetEmail(false);
+        }, 5000);
+        return;
       }
 
-      alert('Password reset email sent! Check your inbox.');
-    } catch (error) {
+      setPasswordError('Password reset email sent! Check your inbox.');
+      setTimeout(() => {
+        setPasswordError('');
+        setSendingResetEmail(false);
+      }, 5000);
+    } catch (error: any) {
       console.error('Error sending reset email:', error);
-      alert('Failed to send reset email. Please try again.');
+
+      // Handle specific error cases
+      if (error?.message?.includes('email_send_rate_limit') || error?.message?.includes('rate limit')) {
+        setPasswordError('Too many password reset requests. Please wait 60 seconds before trying again.');
+      } else if (error?.status === 429) {
+        setPasswordError('Too many requests. Please wait a few minutes and try again.');
+      } else {
+        setPasswordError('Failed to send reset email. Please try again later.');
+      }
+      setTimeout(() => {
+        setPasswordError('');
+        setSendingResetEmail(false);
+      }, 60000); // 60 second cooldown on error
     }
   };
 
@@ -219,10 +237,6 @@ export default function SettingsPage() {
 
   // Handle logout all devices
   const handleLogoutAllDevices = async () => {
-    if (!window.confirm('Are you sure you want to log out of all devices?')) {
-      return;
-    }
-
     try {
       // Sign out globally - this invalidates all sessions
       await supabase.auth.signOut({ scope: 'global' });
@@ -230,7 +244,6 @@ export default function SettingsPage() {
       router.refresh();
     } catch (error) {
       console.error('Error logging out all devices:', error);
-      alert('Failed to log out of all devices. Please try again.');
     }
   };
 
@@ -247,7 +260,7 @@ export default function SettingsPage() {
       <div>
         <h1 className="text-3xl font-bold">Account Settings</h1>
         <p className="mt-2 text-gray-600">
-          Manage your profile, security settings, and connected accounts
+          Manage your profile information
         </p>
       </div>
 
@@ -267,7 +280,7 @@ export default function SettingsPage() {
           <div className="flex items-center gap-4">
             <div className="relative">
               <div className="flex size-20 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-blue-500 text-2xl font-bold text-white">
-                {profile.name?.[0]?.toUpperCase() || profile.email[0].toUpperCase()}
+                {profile.name?.[0]?.toUpperCase() || profile.email?.[0]?.toUpperCase() || 'U'}
               </div>
               <button
                 type="button"
@@ -284,17 +297,13 @@ export default function SettingsPage() {
 
           <Separator />
 
-          {/* Name & Job Title */}
+          {/* Name */}
           {!isEditingProfile
             ? (
                 <div className="space-y-4">
                   <div>
                     <Label className="text-gray-600">Name</Label>
                     <p className="mt-1 font-medium">{profile.name || 'Not set'}</p>
-                  </div>
-                  <div>
-                    <Label className="text-gray-600">Job Title</Label>
-                    <p className="mt-1 font-medium">{profile.job_title || 'Not set'}</p>
                   </div>
                   <Button onClick={() => setIsEditingProfile(true)} variant="outline">
                     Edit Profile
@@ -312,15 +321,6 @@ export default function SettingsPage() {
                       placeholder="Enter your name"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="job-title">Job Title (Optional)</Label>
-                    <Input
-                      id="job-title"
-                      value={profileForm.job_title}
-                      onChange={e => setProfileForm({ ...profileForm, job_title: e.target.value })}
-                      placeholder="e.g., Product Manager"
-                    />
-                  </div>
                   <div className="flex gap-2">
                     <Button onClick={handleSaveProfile} disabled={savingProfile}>
                       <Check className="mr-2 size-4" />
@@ -331,7 +331,6 @@ export default function SettingsPage() {
                         setIsEditingProfile(false);
                         setProfileForm({
                           name: profile.name || '',
-                          job_title: profile.job_title || '',
                         });
                       }}
                       variant="outline"
@@ -345,83 +344,18 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
 
-      {/* Security Section */}
+      {/* Password Section */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Shield className="size-5" />
-            Security & Authentication
+            Password & Security
           </CardTitle>
           <CardDescription>
-            Manage your email, password, and connected accounts
+            Manage your password and account security
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Email */}
-          <div>
-            <Label className="flex items-center gap-2 text-base font-semibold">
-              <Mail className="size-4" />
-              Email Address
-            </Label>
-            {!isEditingEmail
-              ? (
-                  <div className="mt-2 space-y-2">
-                    <p className="font-medium">{profile.email}</p>
-                    <Button onClick={() => setIsEditingEmail(true)} variant="outline" size="sm">
-                      Change Email
-                    </Button>
-                  </div>
-                )
-              : (
-                  <div className="mt-2 space-y-3">
-                    {emailVerificationSent
-                      ? (
-                          <div className="rounded-lg border border-green-200 bg-green-50 p-4">
-                            <p className="text-sm text-green-800">
-                              ✓ Verification email sent! Check your inbox at
-                              {' '}
-                              <strong>{newEmail}</strong>
-                              {' '}
-                              to
-                              confirm the change.
-                            </p>
-                          </div>
-                        )
-                      : (
-                          <>
-                            <Input
-                              type="email"
-                              value={newEmail}
-                              onChange={e => setNewEmail(e.target.value)}
-                              placeholder="Enter new email address"
-                            />
-                            <p className="text-sm text-gray-600">
-                              You'll receive a verification link at your new email address.
-                            </p>
-                            <div className="flex gap-2">
-                              <Button onClick={handleEmailChange} disabled={savingEmail} size="sm">
-                                {savingEmail ? 'Sending...' : 'Send Verification Email'}
-                              </Button>
-                              <Button
-                                onClick={() => {
-                                  setIsEditingEmail(false);
-                                  setNewEmail('');
-                                }}
-                                variant="outline"
-                                size="sm"
-                              >
-                                Cancel
-                              </Button>
-                            </div>
-                          </>
-                        )}
-                  </div>
-                )}
-          </div>
-
-          <Separator />
-
-          {/* Password */}
           <div>
             <Label className="text-base font-semibold">Password</Label>
             {!isEditingPassword
@@ -432,8 +366,13 @@ export default function SettingsPage() {
                       <Button onClick={() => setIsEditingPassword(true)} variant="outline" size="sm">
                         Change Password
                       </Button>
-                      <Button onClick={handleForgotPassword} variant="ghost" size="sm">
-                        Forgot Password?
+                      <Button
+                        onClick={handleForgotPassword}
+                        variant="ghost"
+                        size="sm"
+                        disabled={sendingResetEmail}
+                      >
+                        {sendingResetEmail ? 'Sending...' : 'Forgot Password?'}
                       </Button>
                     </div>
                   </div>
@@ -472,7 +411,9 @@ export default function SettingsPage() {
                       />
                     </div>
                     {passwordError && (
-                      <p className="text-sm text-red-600">{passwordError}</p>
+                      <p className={`text-sm ${passwordError.includes('successfully') ? 'text-green-600' : 'text-red-600'}`}>
+                        {passwordError}
+                      </p>
                     )}
                     <div className="flex gap-2">
                       <Button onClick={handlePasswordChange} disabled={savingPassword} size="sm">
@@ -492,46 +433,6 @@ export default function SettingsPage() {
                     </div>
                   </div>
                 )}
-          </div>
-
-          <Separator />
-
-          {/* Connected Accounts */}
-          <div>
-            <Label className="text-base font-semibold">Connected Accounts</Label>
-            <p className="mt-1 text-sm text-gray-600">
-              Manage third-party accounts linked to your profile
-            </p>
-            <div className="mt-4 space-y-3">
-              {connectedAccounts.length > 0
-                ? (
-                    connectedAccounts.map(account => (
-                      <div
-                        key={account.provider}
-                        className="flex items-center justify-between rounded-lg border p-3"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="flex size-10 items-center justify-center rounded-full bg-gray-100">
-                            <span className="text-sm font-semibold">{account.provider[0]}</span>
-                          </div>
-                          <div>
-                            <p className="font-medium">{account.provider}</p>
-                            <p className="text-sm text-gray-600">{account.email}</p>
-                          </div>
-                        </div>
-                        <Button variant="outline" size="sm">
-                          Disconnect
-                        </Button>
-                      </div>
-                    ))
-                  )
-                : (
-                    <p className="text-sm text-gray-500">No connected accounts</p>
-                  )}
-              <Button variant="outline" size="sm" className="w-full">
-                + Connect Google Account
-              </Button>
-            </div>
           </div>
         </CardContent>
       </Card>

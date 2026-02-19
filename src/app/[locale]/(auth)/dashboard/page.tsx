@@ -191,9 +191,17 @@ export default function DashboardPage() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold">Products</h2>
-            <Button variant="outline" onClick={() => setViewMode(null)}>
-              Clear View
-            </Button>
+            <div className="flex gap-2">
+              <Link href="/dashboard/products/add">
+                <Button>
+                  <Plus className="mr-2 size-4" />
+                  Add Product
+                </Button>
+              </Link>
+              <Button variant="outline" onClick={() => setViewMode(null)}>
+                Clear View
+              </Button>
+            </div>
           </div>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -287,9 +295,17 @@ export default function DashboardPage() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold">Ingredients</h2>
-            <Button variant="outline" onClick={() => setViewMode(null)}>
-              Clear View
-            </Button>
+            <div className="flex gap-2">
+              <Link href="/dashboard/ingredients/add">
+                <Button>
+                  <Plus className="mr-2 size-4" />
+                  Add Ingredient
+                </Button>
+              </Link>
+              <Button variant="outline" onClick={() => setViewMode(null)}>
+                Clear View
+              </Button>
+            </div>
           </div>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
