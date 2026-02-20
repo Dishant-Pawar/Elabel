@@ -73,7 +73,7 @@ export default function SignInForm({ locale }: { locale: string }) {
                 <label htmlFor="password" className="block text-xs font-semibold uppercase tracking-wide text-slate-600">
                   Password
                 </label>
-                <a href="#" className="text-xs font-medium text-blue-600 transition-colors hover:text-blue-700">
+                <a href={getI18nPath('/forgot-password', locale)} className="text-xs font-medium text-blue-600 transition-colors hover:text-blue-700">
                   Forgot password?
                 </a>
               </div>
